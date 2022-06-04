@@ -1,10 +1,7 @@
 package org.example;
 
 
-import org.example.model.Director;
-import org.example.model.Film;
-import org.example.model.Item;
-import org.example.model.Person;
+import org.example.model.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -20,27 +17,32 @@ import java.util.List;
 public class App {
     public static void main(String[] args) {
         Configuration configuration = new Configuration().addAnnotatedClass(Person.class)
-                .addAnnotatedClass(Item.class).addAnnotatedClass(Director.class).addAnnotatedClass(Film.class);
+                .addAnnotatedClass(Item.class).addAnnotatedClass(Director.class).addAnnotatedClass(Film.class)
+                .addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
         SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
-        try {
-            session.beginTransaction();
-            Person person = new Person("Goga", 25);
-            Item item = new Item("Item1");
-            Item item1 = new Item("Item2");
-            Item item2 = new Item("Item3");
-            person.addItem(item);
-            person.addItem(item1);
-            person.addItem(item2);
 
-            session.save(person);
+        try(sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+            Movie movie = new Movie("NameOfFirstMovie",1994);
+            Actor actor = new Actor("FirstActor",25);
+            Actor actor1 = new Actor("SecondActor",40);
+
+            movie.setActors(new ArrayList<>(List.of(actor1,actor)));
+
+            actor.setMovies(new ArrayList<>(Collections.singletonList(movie)));
+            actor1.setMovies(new ArrayList<>(Collections.singletonList(movie)));
+            session.save(movie);
+            session.save(actor);
+            session.save(actor1);
+
+
             session.getTransaction().commit();
 
 
-        } finally {
-            sessionFactory.close();
+        }
         }
 
 
     }
-}
+
